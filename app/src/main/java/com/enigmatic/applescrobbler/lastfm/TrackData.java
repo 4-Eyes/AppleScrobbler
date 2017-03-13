@@ -78,7 +78,14 @@ public class TrackData {
         if (this.getState().equals(data.getState())) return;
         if (this.currentState.equals(PlayingState.Playing) && data.currentState == PlayingState.Paused) {
             playTimes.add(data.getStartTime().getTime() - this.lastStateChangedTime.getTime());
-            lastStateChangedTime = new Date(System.currentTimeMillis());
+        }
+        this.currentState = data.currentState;
+        lastStateChangedTime = new Date(System.currentTimeMillis());
+    }
+
+    public void finalisePlayTime() {
+        if (currentState.equals(PlayingState.Playing)) {
+            playTimes.add(System.currentTimeMillis() - lastStateChangedTime.getTime());
         }
     }
 

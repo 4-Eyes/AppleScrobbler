@@ -28,7 +28,10 @@ public class NotificationScrobbleHandler {
             if (currentTrack.sameTrack(data)) {
                 currentTrack.mergeSame(data);
             } else {
+                Log.i("Scrobbling", "New track detected");
+                currentTrack.finalisePlayTime();
                 if (TrackDataUtils.validScrobble(currentTrack, currentTrackDuration)) {
+                    Log.i("Scrobbling", "Scrobbling track");
                     LfmApi.track().scrobble(TrackDataUtils.prepareForScrobble(currentTrack))
                             .executeWithListener(new LfmRequest.LfmRequestListener() {
                                 @Override
@@ -38,7 +41,7 @@ public class NotificationScrobbleHandler {
 
                                 @Override
                                 public void onError(LfmError error) {
-
+                                    Log.e("Scrobbling", error.errorMessage);
                                 }
                             });
                 }
@@ -48,20 +51,23 @@ public class NotificationScrobbleHandler {
         }
 
         if (newTrack) {
+            Log.i("Scrobbling", "Loading new data for song " + data.getTitle());
             LfmApi.track().getInfo(TrackDataUtils.prepareForRequest(data))
                     .executeWithListener(new LfmRequest.LfmRequestListener() {
                         @Override
                         public void onComplete(JSONObject response) {
                             try {
                                 currentTrackDuration = response.getJSONObject("track").getLong("duration");
+                                Log.i("Scrobbling", "Successfully loaded data for song");
                             } catch (JSONException e) {
+                                Log.e("Scrobbling", e.getMessage());
                                 e.printStackTrace();
                             }
                         }
 
                         @Override
                         public void onError(LfmError error) {
-
+                            Log.e("Scrobbling", error.errorMessage);
                         }
                     });
         }

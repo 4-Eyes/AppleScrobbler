@@ -2,6 +2,7 @@ package com.enigmatic.applescrobbler.services;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -25,6 +26,11 @@ public class NotificationService extends NotificationListenerService {
     private Context context;
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
@@ -37,6 +43,8 @@ public class NotificationService extends NotificationListenerService {
         super.onNotificationPosted(statusBarNotification);
         RemoteViews remoteViews = statusBarNotification.getNotification().bigContentView;
         RemoteViewsInfo info = RemoteViewsReader.read(this, remoteViews);
+
+        if (!info.getHostApplicaiton().packageName.equals("com.apple.android.music")) return;
 
         TrackData data = new TrackData();
         int dataCount = 0;
