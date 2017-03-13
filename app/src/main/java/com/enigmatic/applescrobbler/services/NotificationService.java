@@ -1,24 +1,22 @@
 package com.enigmatic.applescrobbler.services;
 
+import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Build;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.content.ContentResolverCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.enigmatic.applescrobbler.lastfm.NotificationScrobbleHandler;
 import com.enigmatic.applescrobbler.lastfm.TrackData;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Date;
+
+import jp.yokomark.remoteview.reader.RemoteViewsInfo;
+import jp.yokomark.remoteview.reader.RemoteViewsReader;
+import jp.yokomark.remoteview.reader.action.ReflectionAction;
+import jp.yokomark.remoteview.reader.action.RemoteViewsAction;
 
 
 public class NotificationService extends NotificationListenerService {
@@ -33,45 +31,29 @@ public class NotificationService extends NotificationListenerService {
         Log.i("NotificationStuff", "Notification listener created");
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onNotificationPosted(StatusBarNotification statusBarNotification) {
-        // Filter it so that we only extract information from apple music notifications
-        if (!statusBarNotification.getPackageName().equals("com.apple.android.music")) return;
+        super.onNotificationPosted(statusBarNotification);
+        RemoteViews remoteViews = statusBarNotification.getNotification().bigContentView;
+        RemoteViewsInfo info = RemoteViewsReader.read(this, remoteViews);
 
-        RemoteViews views = statusBarNotification.getNotification().bigContentView;
-//        if (views == null) views = statusBarNotification.getNotification().contentView;
-        if (views == null) return;
-
-        Log.i("NotificationStuff", "New notification being processed");
         TrackData data = new TrackData();
         int dataCount = 0;
-        try {
-            Field field = views.getClass().getDeclaredField("mActions");
-            field.setAccessible(true);
+        for (RemoteViewsAction action : info.getActions()) {
+//            if (action instanceof BitmapReflectionAction) {
+//                Bitmap bitmap = ((BitmapReflectionAction)action).getBitmap();
+//                Intent intent = new Intent("Msg");
+//                intent.putExtra("bitmap", bitmap);
+//                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+//            }
+            if (action instanceof ReflectionAction) {
+                ReflectionAction reflectionAction = (ReflectionAction) action;
+                String methodName = reflectionAction.getMethodName();
 
-            ArrayList<Parcelable> actions = (ArrayList<Parcelable>) field.get(views);
-
-//            Log.i("NotificationStuff", "Number of actions: " + actions.size());
-
-            for (Parcelable p : actions) {
-                Parcel parcel = Parcel.obtain();
-                p.writeToParcel(parcel, 0);
-                parcel.setDataPosition(0);
-
-                int tag = parcel.readInt();
-                if (tag != 2 &&  tag != 12) continue; // 2 is ReflectionAction, 12 is BitmapReflectionAction
-
-                parcel.readInt();
-
-                String methodName = parcel.readString();
-//                Log.i("NotificationStuff", "Method name: " + methodName);
-                if (methodName == null) {
-                    continue;
-                }
-                else if (methodName.equals("setText")) {
-                    parcel.readInt();
-
-                    String t = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel).toString().trim();
+                if (methodName.equals("setText")) {
+                    String t = (String)reflectionAction.getValue();
+                    t = t.trim();
                     switch (dataCount) {
                         case 0:
                             data.setTitle(t);
@@ -84,50 +66,15 @@ public class NotificationService extends NotificationListenerService {
                             break;
                     }
                     dataCount++;
-                }
-                else if (methodName.equals("setContentDescription")) {
-                    parcel.readInt();
-
-                    String t = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel).toString().trim();
-                    Log.i("NotificationStuff", "Content Description: " + t);
-                    data.setConetentType(t);
-                }
-                else if (methodName.equals("setTime")) {
-                    parcel.readInt();
-
-                    Date time = new Date(parcel.readLong());
-
-//                    Log.i("NotificationStuff", "Time Stamp: " + time.toString());
-                    data.setScrobbleTime(time);
-                }
-                else if (methodName.equals("setImageResource")) {
-                    parcel.readInt();
-
-                    int imageResource = parcel.readInt();
-//                    Log.i("NotificationStuff", "Image Resource: " + imageResource);
-                }
-                else if (methodName.equals("setEnabled")) {
-                    parcel.readInt();
-
-                    boolean enabled = parcel.readByte() != 0;
-//                    Log.i("NotificationStuff", "Enabled: " + enabled);
-                }
-                else if (methodName.equals("setImageBitmap")){
-//                    parcel.readInt();
-//
-//
-//                    Bitmap bitmap = Bitmap.CREATOR.createFromParcel(parcel);
-//                    Intent intent = new Intent("Msg");
-//                    intent.putExtra("bitmap", bitmap);
-//                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                } else if (methodName.equals("setContentDescription")) {
+                    String t = (String)reflectionAction.getValue();
+                    t = t.trim();
+                    data.setContentType(t);
+                    Log.i("NotificationDetails", "Content Description: " + t);
                 }
             }
-        } catch (Exception e) {
-            Log.e("NotificationStuff", e.getMessage());
-            e.printStackTrace();
         }
-
+        data.setStartTime(new Date(System.currentTimeMillis()));
         handler.push(data);
-
     }
 }

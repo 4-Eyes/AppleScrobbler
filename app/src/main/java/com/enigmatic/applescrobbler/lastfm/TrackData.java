@@ -1,16 +1,23 @@
 package com.enigmatic.applescrobbler.lastfm;
 
-import com.ag.lfm.ScrobbleParameters;
-
+import java.util.ArrayList;
 import java.util.Date;
 
 public class TrackData {
 
+    public enum PlayingState {
+        Playing,
+        Paused,
+        Unknown
+    }
+
     private String artist;
     private String title;
     private String album;
-    private Date scrobbleTime;
-    private String conetentType;
+    private Date startTime;
+    private PlayingState currentState = PlayingState.Unknown;
+    private ArrayList<Long> playTimes = new ArrayList<>();
+    private Date lastStateChangedTime;
 
     public String getArtist() {
         return artist;
@@ -36,29 +43,48 @@ public class TrackData {
         this.album = album;
     }
 
-    public Date getScrobbleTime() {
-        return scrobbleTime;
+    public Date getStartTime() {
+        return startTime;
     }
 
-    public void setScrobbleTime(Date scrobbleTime) {
-        this.scrobbleTime = scrobbleTime;
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
-    public ScrobbleParameters prepareForScrobble() {
-        ScrobbleParameters params = new ScrobbleParameters();
-        params.put("track", this.title);
-        params.put("album", this.album);
-        params.put("artist", this.artist);
-        params.put("timestamp", String.valueOf(this.scrobbleTime.getTime()/1000));
-
-        return params;
+    public void setContentType(String contentType) {
+        switch (contentType) {
+            case "Pause":
+                currentState = PlayingState.Playing;
+                break;
+            case "Play":
+                currentState = PlayingState.Paused;
+                break;
+            default:
+                currentState = PlayingState.Unknown;
+                break;
+        }
+        this.lastStateChangedTime = new Date(System.currentTimeMillis());
     }
 
-    public void setConetentType(String conetentType) {
-        this.conetentType = conetentType;
+    public PlayingState getState() {
+        return this.currentState;
     }
 
-    public String getConetentType() {
-        return this.conetentType;
+    public ArrayList<Long> getPlayTimes() {
+        return this.playTimes;
+    }
+
+    public void mergeSame(TrackData data) {
+        if (this.getState().equals(data.getState())) return;
+        if (this.currentState.equals(PlayingState.Playing) && data.currentState == PlayingState.Paused) {
+            playTimes.add(data.getStartTime().getTime() - this.lastStateChangedTime.getTime());
+            lastStateChangedTime = new Date(System.currentTimeMillis());
+        }
+    }
+
+    public boolean sameTrack(TrackData other) {
+        return this.title != null && this.artist != null && this.album != null &&
+                other.title != null && other.artist != null && other.album != null &&
+                this.title.equals(other.title) && this.artist.equals(other.artist) && this.album.equals(other.album);
     }
 }

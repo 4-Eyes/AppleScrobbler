@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.ag.lfm.Lfm;
 import com.ag.lfm.LfmError;
@@ -29,7 +30,7 @@ import com.enigmatic.applescrobbler.services.NotificationService;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    ImageView imageView;
+//    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +52,9 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.main_layout);
-        imageView = new ImageView(this);
-        layout.addView(imageView);
+//        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.main_layout);
+//        imageView = new ImageView(this);
+//        layout.addView(imageView);
 
 
         Lfm.wakeUpSession(new Lfm.LfmCallback<Lfm.LoginState>() {
@@ -146,8 +147,11 @@ public class MainActivity extends AppCompatActivity
     private BroadcastReceiver onNotice = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Bitmap bitmap = intent.getParcelableExtra("bitmap");
-            imageView.setImageBitmap(bitmap);
+//            Bitmap bitmap = intent.getParcelableExtra("bitmap");
+//            LinearLayout layout = (LinearLayout) findViewById(R.id.main_layout);
+//            ImageView imageView = new ImageView(MainActivity.this);
+//            imageView.setImageBitmap(bitmap);
+//            layout.addView(imageView);
         }
     };
 }
