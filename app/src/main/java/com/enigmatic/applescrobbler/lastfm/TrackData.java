@@ -1,6 +1,5 @@
 package com.enigmatic.applescrobbler.lastfm;
 
-import com.ag.lfm.LfmParameters;
 import com.ag.lfm.ScrobbleParameters;
 
 import java.util.Date;
@@ -11,6 +10,7 @@ public class TrackData {
     private String title;
     private String album;
     private Date scrobbleTime;
+    private String conetentType;
 
     public String getArtist() {
         return artist;
@@ -52,5 +52,13 @@ public class TrackData {
         params.put("timestamp", String.valueOf(this.scrobbleTime.getTime()/1000));
 
         return params;
+    }
+
+    public void setConetentType(String conetentType) {
+        this.conetentType = conetentType;
+    }
+
+    public String getConetentType() {
+        return this.conetentType;
     }
 }
