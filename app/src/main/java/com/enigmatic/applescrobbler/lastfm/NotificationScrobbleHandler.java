@@ -42,6 +42,7 @@ public class NotificationScrobbleHandler {
                                 @Override
                                 public void onError(LfmError error) {
                                     Log.e("Scrobbling", error.errorMessage);
+                                    Log.e("Scrobbling", error.toString());
                                 }
                             });
                 }
