@@ -10,14 +10,10 @@ public class TrackDataUtils {
 
     public static ScrobbleParameters prepareForScrobble(TrackData data) {
         ScrobbleParameters params = new ScrobbleParameters();
-        try {
-            params.put("track", URLEncoder.encode(data.getTitle(), "UTF-8"));
-            params.put("album", URLEncoder.encode(data.getAlbum(), "UTF-8"));
-            params.put("artist", URLEncoder.encode(data.getArtist(), "UTF-8"));
-            params.put("timestamp", URLEncoder.encode(String.valueOf(data.getStartTime().getTime()/1000), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        params.put("track", data.getTitle());
+        params.put("album", data.getAlbum());
+        params.put("artist", data.getArtist());
+        params.put("timestamp", String.valueOf(data.getStartTime().getTime()/1000));
 
         return params;
     }
