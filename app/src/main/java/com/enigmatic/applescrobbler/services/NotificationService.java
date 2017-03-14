@@ -42,9 +42,19 @@ public class NotificationService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification statusBarNotification) {
         super.onNotificationPosted(statusBarNotification);
         RemoteViews remoteViews = statusBarNotification.getNotification().bigContentView;
+        if (remoteViews == null) {
+            Log.i("NotificationDetails", "Notification had no big content view");
+            return;
+        }
         RemoteViewsInfo info = RemoteViewsReader.read(this, remoteViews);
 
-        if (!info.getHostApplicaiton().packageName.equals("com.apple.android.music")) return;
+        if (info.getHostApplicaiton() == null) {
+            Log.i("NotificationDetails", "Host Application info was null");
+            return;
+        }
+        String packageName = info.getHostApplicaiton().packageName;
+        if (packageName == null) return;
+        if (!packageName.equals("com.apple.android.music")) return;
 
         TrackData data = new TrackData();
         int dataCount = 0;
