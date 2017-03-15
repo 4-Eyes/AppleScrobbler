@@ -15,10 +15,6 @@ public class NotificationScrobbleHandler {
     private TrackData currentTrack;
     private long currentTrackDuration;
 
-    public NotificationScrobbleHandler() {
-
-    }
-
     public void push(TrackData data) {
         boolean newTrack = false;
         if (currentTrack == null) {
