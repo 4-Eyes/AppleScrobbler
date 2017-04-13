@@ -3,9 +3,9 @@ package com.enigmatic.applescrobbler.lastfm;
 
 import android.util.Log;
 
-import com.ag.lfm.LfmError;
-import com.ag.lfm.LfmRequest;
-import com.ag.lfm.api.LfmApi;
+import com.last.fm.api.LfmApi;
+import com.last.fm.api.LfmError;
+import com.last.fm.api.LfmRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;

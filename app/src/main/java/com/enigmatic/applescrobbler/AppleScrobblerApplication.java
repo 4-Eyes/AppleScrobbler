@@ -2,7 +2,7 @@ package com.enigmatic.applescrobbler;
 
 import android.app.Application;
 
-import com.ag.lfm.Lfm;
+import com.last.fm.api.Lfm;
 
 public class AppleScrobblerApplication extends Application {
 

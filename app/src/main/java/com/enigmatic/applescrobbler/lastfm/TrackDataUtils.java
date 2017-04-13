@@ -1,10 +1,8 @@
 package com.enigmatic.applescrobbler.lastfm;
 
-import com.ag.lfm.LfmParameters;
-import com.ag.lfm.ScrobbleParameters;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import com.last.fm.api.LfmParameters;
+import com.last.fm.api.ScrobbleParameters;
 
 public class TrackDataUtils {
 
